@@ -1,32 +1,15 @@
 package sentiment
 
-import (
-	"fmt"
-	"os"
-	"testing"
-)
+import "testing"
+
+var model *Model
 
 func init() {
-	err := parseDirToData(pos, 1)
-	if err != nil {
-		panic(fmt.Sprintf("Count not parse directory < %v > to data!\n\t%v\n", pos, err))
-	}
+	var err error
 
-	err = parseDirToData(neg, -1)
+	model, err = Train("/tmp/.sentiment")
 	if err != nil {
-		panic(fmt.Sprintf("Count not parse directory < %v > to data!\n\t%v\n", neg, err))
-	}
-
-	calcProbabilities()
-
-	err = os.MkdirAll("/tmp/.sentiment", os.ModePerm)
-	if err != nil {
-		panic(fmt.Sprintf("Count not create temp directory!\n\t%v\n", err))
-	}
-
-	err = PersistToFile(words, "/tmp/.sentiment/words.json")
-	if err != nil {
-		panic(fmt.Sprintf("Could not persist words to JSON!\n\t%v\n", err))
+		panic(err.Error())
 	}
 }
 
@@ -35,7 +18,7 @@ func TestPositiveWordSentimentShouldPass1(t *testing.T) {
 
 	w := []string{"happy", "love", "happiness", "humanity", "awesome", "great", "fun", "super", "trust", "fearless", "creative", "dream", "good", "compassion", "joy", "independent", "success"}
 	for _, word := range w {
-		s := SentimentOfWord(Clean(word))
+		s := model.SentimentOfWord(Clean(word))
 		if s <= 0 {
 			t.Errorf("Sentiment of < %v > (returned %v) should be greater than 0!\n", word, s)
 		} else {
@@ -43,11 +26,11 @@ func TestPositiveWordSentimentShouldPass1(t *testing.T) {
 		}
 	}
 
-	if SentimentOfWord("awesome") < SentimentOfWord("happy") {
+	if model.SentimentOfWord("awesome") < model.SentimentOfWord("happy") {
 		t.Error("Sentiment of word < 'awesome' > should be greater than sentiment of word < 'happy' >")
 	}
 
-	if SentimentOfWord("happy") < SentimentOfWord("decent") {
+	if model.SentimentOfWord("happy") < model.SentimentOfWord("decent") {
 		t.Error("Sentiment of word < 'happy' > should be greater than sentiment of word < 'decent' >")
 	}
 }
@@ -57,7 +40,7 @@ func TestNegativeWordSentimentShouldPass1(t *testing.T) {
 
 	w := []string{"not", "resent", "deplorable", "bad", "terrible", "hate", "scary", "terrible", "concerned", "wrong", "rude!!!", "sad", "horrible", "unimpressed", "useless", "offended", "disrespectful"}
 	for _, word := range w {
-		s := SentimentOfWord(Clean(word))
+		s := model.SentimentOfWord(Clean(word))
 		if s >= 0 {
 			t.Errorf("Sentiment of < %v > (returned %v) should be less than 0!\n", word, s)
 		} else {
@@ -65,11 +48,11 @@ func TestNegativeWordSentimentShouldPass1(t *testing.T) {
 		}
 	}
 
-	if SentimentOfWord("hate") < SentimentOfWord("resent") {
+	if model.SentimentOfWord("hate") < model.SentimentOfWord("resent") {
 		t.Error("Sentiment of word < 'hate' > should be greater than sentiment of word < 'resent' >")
 	}
 
-	if SentimentOfWord("resent") < SentimentOfWord("bad") {
+	if model.SentimentOfWord("resent") < model.SentimentOfWord("bad") {
 		t.Error("Sentiment of word < 'bad' > should be greater than sentiment of word < 'bad' >")
 	}
 }
@@ -94,7 +77,7 @@ func TestPositiveSentenceSentimentShouldPass1(t *testing.T) {
 	}
 
 	for _, sentence := range w {
-		s := SentimentOfSentence(Clean(sentence))
+		s := model.SentimentOfSentence(Clean(sentence))
 		if s <= 0 {
 			t.Errorf("Sentiment of sentence < %v > (returned %v) should be greater than 0!\n", sentence, s)
 		} else {
@@ -122,7 +105,7 @@ func TestNegativeSentenceSentimentShouldPass1(t *testing.T) {
 	}
 
 	for _, sentence := range w {
-		s := SentimentOfSentence(Clean(sentence))
+		s := model.SentimentOfSentence(Clean(sentence))
 		if s >= 0 {
 			t.Errorf("Sentiment of sentence < %v > (returned %v) should be less than 0!\n", sentence, s)
 		} else {
@@ -134,7 +117,7 @@ func TestNegativeSentenceSentimentShouldPass1(t *testing.T) {
 func TestSentimentAnalysisShouldPass1(t *testing.T) {
 	transcript := `On the cross to put away sin by the sacrifice of himself told ...so infinite are on this is so great that only the sacrifice of jesus christ god son could pay for the enormously of arson thank god. He said his son to die for your ...you could be  and blameless before this is john macarthur praying you're continuing to be corporate Now let's get a check of traffic with charlie simon's ...into chaos by a traffic ...center got a problem ...five northbound if your past ninety nine ...just went past the airport and you're ...the woodland watch out in the left lane we have an accident at old river road traffic is backed up the vietnam veterans memorial bridge so far and getting slower by the second incident cleared fifty eastbound eldorado hills boulevard that's good news ninety nine southbound shoulders blocked by an accident at ...and ...capital city freeway the business eighty portion it's got its usual stop-and-go happening right about ...street until you get past E street that ...driving arbitrarily simon's seven ten K FI a joins us now for basic gospel with bob davis and richard piper recorded earlier for broadcasted this time on seven ten K ...keeping faith in america.</p> Fellow everybody with richard piper I bought a and this is basic gossip of ...dedicated to helping ...loop ...good ... If you level bible question or ...because we ... ...recall right ...number's eight four three two seven four two eight four three two seven four two we're lives off the air and online bright out you can get ...could answer your question or discuss the issues ...important in your life so we both of those fault line in the toll-free number four three two seven four two we'd love to hear from you right now it's basic gospel everybody now here's richard piper thanks bob almost long we've been the studying the< idea of freedom why it's so important how do you find it what's the source of it I don't think we could talk about freedom enough because everything in`
 
-	analysis := SentimentAnalysis(transcript)
+	analysis := model.SentimentAnalysis(transcript)
 
 	if analysis.Score <= 0 {
 		t.Errorf("Analysis of transcript should be greater than 0\n\treturned %v\n", analysis.Score)
@@ -153,7 +136,7 @@ func TestSentimentAnalysisShouldPass1(t *testing.T) {
 func TestSentimentAnalysisShouldPass2(t *testing.T) {
 	transcript := `The anti-immigration people have to invent some explanation to account for all the effort technology companies have expended trying to make immigration easier. So they claim it's because they want to drive down salaries. But if you talk to startups, you find practically every one over a certain size has gone through legal contortions to get programmers into the US, where they then paid them the same as they'd have paid an American. Why would they go to extra trouble to get programmers for the same price? The only explanation is that they're telling the truth: there are just not enough great programmers to go around`
 
-	analysis := SentimentAnalysis(transcript)
+	analysis := model.SentimentAnalysis(transcript)
 
 	if analysis.Score >= 0 {
 		t.Errorf("Analysis of transcript should be greater than 0\n\treturned %v\n", analysis.Score)
@@ -172,7 +155,7 @@ func TestSentimentAnalysisShouldPass2(t *testing.T) {
 func TestAssholeSentimentAnalysisShouldPass1(t *testing.T) {
 	transcript := `Thank you. It's true, and these are the best and the finest. When Mexico sends its people, they're not sending their best. They're not sending you. They're not sending you. They're sending people that have lots of problems, and they're bringing those problems with us. They're bringing drugs. They're bringing crime. They're rapists. And some, I assume, are good people. But I speak to border guards and they tell us what we're getting. And it only makes common sense. It only makes common sense. They're sending us not the right people. It's coming from more than Mexico. It's coming from all over South and Latin America, and it's coming probably -- probably -- from the Middle East. But we don't know. Because we have no protection and we have no competence, we don't know what's happening. And it's got to stop and it's got to stop fast.`
 
-	analysis := SentimentAnalysis(transcript)
+	analysis := model.SentimentAnalysis(transcript)
 
 	if analysis.Score >= 0 {
 		t.Errorf("Analysis of transcript should be greater than 0\n\treturned %v\n", analysis.Score)

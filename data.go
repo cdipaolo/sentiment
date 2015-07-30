@@ -65,6 +65,12 @@ func init() {
 	rand.Seed(42)
 }
 
+// Model encapsulates a the data required
+// to run sentiment prediction
+type Model struct {
+	Words map[string]Word
+}
+
 // Word represents the amount of times
 // a word has been seen within the data
 // and its associated modifier
