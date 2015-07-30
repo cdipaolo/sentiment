@@ -155,6 +155,9 @@ func parseDirToData(dirpath string, modifier int64) error {
 		return nil
 	})
 
+	if ct == 0 {
+		return fmt.Errorf("ERROR: could not find directory!\n\t%v\n", err)
+	}
 	fmt.Printf("\nFinished munging from < %v > to data\n\tdelta: %v\n\taverage time per line: %v\n", dirpath, time.Now().Sub(now), time.Now().Sub(now)/time.Duration(int64(ct)))
 
 	return err
