@@ -1,5 +1,6 @@
 ## Sentiment
 #### Simple Sentiment Analysis in Golang
+[![GoDoc](https://godoc.org/github.com/cdipaolo/sentiment?status.svg)](https://godoc.org/github.com/cdipaolo/sentiment)
 
 Sentiment lets you pass strings into a function and get an estimate of the sentiment of the string (in english) using a very simple probabalistic model. The model is trained off of [this dataset](https://inclass.kaggle.com/c/si650winter11/data) which is a collection of IMDB movie reviews classified by sentiment. The return values of the word sentiment is on the interval [-1,1]. Sentence/text classification can vary but tends to stay close to 0. For sentences, each word probability can be modified by using the words "don't", "not", etc. before the word. Again, this is not some advanced SVM, Neural Net, or Bayesian Classifier.
 
