@@ -1,6 +1,7 @@
 package sentiment
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path"
@@ -94,10 +95,35 @@ func Clean(sentence string) string {
 	return strings.ToLower(sanitized)
 }
 
+// Restore restores a pre-trained model from
+// a binary asset this is the preferable method
+// of generating a model (use it unless you want
+// to train the model again)
+func Restore() (*Model, error) {
+	data, err := Asset("words.json")
+	if err != nil {
+		return nil, fmt.Errorf("Could not restore model from binary asset!\n\t%v\n", err)
+	}
+
+	words := make(map[string]Word)
+	err = json.Unmarshal(data, &words)
+	if err != nil {
+		return nil, fmt.Errorf("Could not unmarshal stored words map!\n\t%v\n", err)
+	}
+
+	return &Model{
+		Words: words,
+	}, nil
+}
+
 // Train takes in a directory path to persist the model
 // to, trains the model, and saves the model to
 // the given file. After this is run you can
 // run the Sentiment... functions effectively.
+//
+// Note that this must be run from within the project
+// directory! To just get the model without re-training
+// you should just call "Resore"
 func Train(dir string) (*Model, error) {
 	err := parseDirToData(pos, 1)
 	if err != nil {
@@ -116,7 +142,7 @@ func Train(dir string) (*Model, error) {
 		return nil, fmt.Errorf("Count not create temp directory!\n\t%v\n", err)
 	}
 
-	err = PersistToFile(words, path.Join(dir, "m.Words.json"))
+	err = PersistToFile(words, path.Join(dir, "words.json"))
 	if err != nil {
 		return nil, fmt.Errorf("Could not persist m.Words to JSON!\n\t%v\n", err)
 	}

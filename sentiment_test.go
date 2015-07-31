@@ -7,7 +7,9 @@ var model *Model
 func init() {
 	var err error
 
-	model, err = Train("/tmp/.sentiment")
+	/*model, err = Train("/tmp/.sentiment")*/
+
+	model, err = Restore()
 	if err != nil {
 		panic(err.Error())
 	}
