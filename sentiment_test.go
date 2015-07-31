@@ -5,9 +5,9 @@ import "testing"
 func init() {
 	var err error
 
-	model, err = Train(".")
+	//model, err = Train(".")
 
-	//model, err = Restore()
+	model, err = Restore()
 	if err != nil {
 		panic(err.Error())
 	}
@@ -134,14 +134,93 @@ func TestSentimentAnalysisShouldPass1(t *testing.T) {
 	}
 }
 
-// Paul Graham essay on immigration laws is _slightly_ negative
+// From Haruki Murakami in Norwegian Wood
 func TestSentimentAnalysisShouldPass2(t *testing.T) {
+	t.Parallel()
+	transcript := `“I like the ferry to Hokkaido. And I have no desire to fly through the air," she said. I accompanied her to Ueno Station. She carried her guitar and I carried her suitcase. We sat on a platform bench waiting for the train to pull in. Reiko wore the same tweed jacket and white trousers she had on when she arrived in Tokyo.`
+
+	analysis := model.SentimentAnalysis(transcript)
+
+	if analysis.Score <= 0.5 {
+		t.Errorf("Analysis of transcript should be greater than 0.5\n\treturned %v\n", analysis.Score)
+	} else {
+		t.Logf("Analysis of transcript was valid\n\treturned %v\n", analysis.Score)
+	}
+
+	if analysis.Words == nil {
+		t.Errorf("Analysis of transcript returned nil words array!\n")
+	} else {
+		t.Logf("Analysis of transcript retuned valid word array\n\t returned %+v\n", analysis.Words)
+	}
+}
+
+// Paul Graham essay on immigration laws is _slightly_ negative
+func TestSentimentAnalysisShouldPass3(t *testing.T) {
 	t.Parallel()
 	transcript := `The anti-immigration people have to invent some explanation to account for all the effort technology companies have expended trying to make immigration easier. So they claim it's because they want to drive down salaries. But if you talk to startups, you find practically every one over a certain size has gone through legal contortions to get programmers into the US, where they then paid them the same as they'd have paid an American. Why would they go to extra trouble to get programmers for the same price? The only explanation is that they're telling the truth: there are just not enough great programmers to go around`
 
 	analysis := model.SentimentAnalysis(transcript)
 
 	if analysis.Score >= 0.5 {
+		t.Errorf("Analysis of transcript should be less than 0.5\n\treturned %v\n", analysis.Score)
+	} else {
+		t.Logf("Analysis of transcript was valid\n\treturned %v\n", analysis.Score)
+	}
+
+	if analysis.Words == nil {
+		t.Errorf("Analysis of transcript returned nil words array!\n")
+	} else {
+		t.Logf("Analysis of transcript retuned valid word array\n\t returned %+v\n", analysis.Words)
+	}
+}
+
+// From Haruki Murakami - Kafka On The Shore
+func TestSentimentAnalysisShouldPass4(t *testing.T) {
+	t.Parallel()
+	transcript := `I'm inside the cafeteria sipping a free cup of hot tea when this young girl comes over and plunks herself down on the plastic seat next to me. In her right hand she has a paper cup of hot coffee she bought from a vending machine, the steam rising up from it, and in her left hand she's holding a small container with sandwiches inside—another bit of vending-machine gourmet fare, by the looks of it. She's kind of funny looking. Her face is out of balance—broad forehead, button nose, freckled cheeks, and pointy ears. A slammed-together, rough sort of face you can't ignore. Still, the whole package isn't so bad. For all I know maybe she's not so wild about her own looks, but she seems comfortable with who she is, and that's the important thing. There's something childish about her that has a calming effect, at least on me. She isn't very tall, but has good-looking legs and a nice bust for such a slim body.`
+
+	analysis := model.SentimentAnalysis(transcript)
+
+	if analysis.Score >= 0.5 {
+		t.Errorf("Analysis of transcript should be less than 0.5\n\treturned %v\n", analysis.Score)
+	} else {
+		t.Logf("Analysis of transcript was valid\n\treturned %v\n", analysis.Score)
+	}
+
+	if analysis.Words == nil {
+		t.Errorf("Analysis of transcript returned nil words array!\n")
+	} else {
+		t.Logf("Analysis of transcript retuned valid word array\n\t returned %+v\n", analysis.Words)
+	}
+}
+
+// From F. Scott Fitzgerald - Great Gatsby
+func TestSentimentAnalysisShouldPass5(t *testing.T) {
+	t.Parallel()
+	transcript := `He smiled understandingly-much more than understandingly. It was one of those rare smiles with a quality of eternal reassurance in it, that you may come across four or five times in life. It faced–or seemed to face–the whole eternal world for an instant, and then concentrated on you with an irresistible prejudice in your favor. It understood you just as far as you wanted to be understood, believed in you as you would like to believe in yourself, and assured you that it had precisely the impression of you that, at your best, you hoped to convey.`
+
+	analysis := model.SentimentAnalysis(transcript)
+
+	if analysis.Score <= 0.5 {
+		t.Errorf("Analysis of transcript should be greater than 0.5\n\treturned %v\n", analysis.Score)
+	} else {
+		t.Logf("Analysis of transcript was valid\n\treturned %v\n", analysis.Score)
+	}
+
+	if analysis.Words == nil {
+		t.Errorf("Analysis of transcript returned nil words array!\n")
+	} else {
+		t.Logf("Analysis of transcript retuned valid word array\n\t returned %+v\n", analysis.Words)
+	}
+}
+
+func TestSentimentAnalysisShouldPass6(t *testing.T) {
+	t.Parallel()
+	transcript := `At the station I pop into the first little diner that catches my eye, and eat my fill of udon. Born and “raised in Tokyo, I haven't had much udon in my life. But now I'm in Udon Central—Shikoku—and confronted with noodles like nothing I've ever seen. They're chewy and fresh, and the soup smells great, really fragrant. And talk about cheap. It all tastes so good I order seconds, and for the first time in who knows how long, I'm happily stuffed. Afterward I plop myself down on a bench in the plaza next to the station and gaze up at the sunny sky. I'm free, I remind myself. Like the clouds floating across the sky, I'm all by myself, totally free.`
+
+	analysis := model.SentimentAnalysis(transcript)
+
+	if analysis.Score <= 0.5 {
 		t.Errorf("Analysis of transcript should be greater than 0.5\n\treturned %v\n", analysis.Score)
 	} else {
 		t.Logf("Analysis of transcript was valid\n\treturned %v\n", analysis.Score)
@@ -162,7 +241,7 @@ func TestAssholeSentimentAnalysisShouldPass1(t *testing.T) {
 	analysis := model.SentimentAnalysis(transcript)
 
 	if analysis.Score >= 0.5 {
-		t.Errorf("Analysis of transcript should be greater than 0.5\n\treturned %v\n", analysis.Score)
+		t.Errorf("Analysis of transcript should be less than 0.5\n\treturned %v\n", analysis.Score)
 	} else {
 		t.Logf("Analysis of transcript was valid\n\treturned %v\n", analysis.Score)
 	}

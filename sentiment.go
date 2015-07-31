@@ -46,17 +46,10 @@ func (m *Model) SentimentOfSentence(sentence string) float64 {
 	var one float64 = 1.0
 	var zero float64 = 1.0
 
-	// negative will be a multiplier for the sentence
-	negative := false
-
 	w := strings.Split(sentence, " ")
-	for i, word := range w {
+	for _, word := range w {
 		if _, ok := m.Words[word]; len(word) < 3 || !ok {
 			continue
-		}
-
-		if w[i] == "not" || w[i] == "cant" || w[i] == "no" || w[i] == "never" || w[i] == "dont" {
-			negative = !negative
 		}
 
 		one += math.Log(m.Words[word].ProbabilityXIsOne)
@@ -65,11 +58,6 @@ func (m *Model) SentimentOfSentence(sentence string) float64 {
 
 	one += math.Log(m.PYIsOne)
 	zero += math.Log(m.PYIsZero)
-
-	// account for negations within the sentence
-	/*if negative {
-		P = 1 - P
-	}*/
 
 	if one > zero {
 		return 1.0
