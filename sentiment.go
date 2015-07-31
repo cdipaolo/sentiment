@@ -3,6 +3,7 @@ package sentiment
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"os"
 	"path"
 	"strings"
@@ -21,39 +22,59 @@ type Analysis struct {
 }
 
 // SentimentOfWord takes in a single word and
-// returns the sentiment of that word (negative
-// would mean negative sentiment, positive would
-// mean positive sentiment)
+// returns the probability that the word is
+// classified as positive based on the corpus
 func (m *Model) SentimentOfWord(word string) float64 {
-	if m.Words[word].Count < 6 || len(word) < 3 {
-		return 0.0
+	if _, ok := m.Words[word]; len(word) < 3 || !ok {
+		return 0.5
 	}
 
-	return m.Words[word].Probability
+	one := m.Words[word].ProbabilityXIsOne * m.PYIsOne
+
+	return one / (one + m.Words[word].ProbabilityXIsZero*m.PYIsZero)
 }
 
 // SentimentOfSentence takes in a string of a
-// space-delimited sentence and returns a
-// weighted sum of their probabilities
+// space-delimited sentence and returns 0 if
+// the sentence is negative and 1 if the sample
+// is positive
 func (m *Model) SentimentOfSentence(sentence string) float64 {
-	var sum float64
+	// These are the _probability_ products
+	// given in the numerator and denominator
+	// that a sentence is positive or negative
+	// (1 or 0)
+	var one float64 = 1.0
+	var zero float64 = 1.0
+
+	// negative will be a multiplier for the sentence
+	negative := false
 
 	w := strings.Split(sentence, " ")
 	for i, word := range w {
-		s := m.SentimentOfWord(word)
-
-		if i > 0 && s > 0 && (w[i-1] == "not" || w[i-1] == "no" || w[i-1] == "never" || w[i-1] == "dont") {
-			s *= -1
+		if _, ok := m.Words[word]; len(word) < 3 || !ok {
+			continue
 		}
 
-		if i > 0 && (w[i-1] == "really") {
-			s *= 1.4
+		if w[i] == "not" || w[i] == "cant" || w[i] == "no" || w[i] == "never" || w[i] == "dont" {
+			negative = !negative
 		}
 
-		sum += s
+		one += math.Log(m.Words[word].ProbabilityXIsOne)
+		zero += math.Log(m.Words[word].ProbabilityXIsZero)
 	}
 
-	return sum
+	one += math.Log(m.PYIsOne)
+	zero += math.Log(m.PYIsZero)
+
+	// account for negations within the sentence
+	/*if negative {
+		P = 1 - P
+	}*/
+
+	if one > zero {
+		return 1.0
+	}
+	return 0.0
 }
 
 // SentimentAnalysis takes in a (possibly 'dirty')
@@ -100,20 +121,18 @@ func Clean(sentence string) string {
 // of generating a model (use it unless you want
 // to train the model again)
 func Restore() (*Model, error) {
-	data, err := Asset("words.json")
+	data, err := Asset("model.json")
 	if err != nil {
 		return nil, fmt.Errorf("Could not restore model from binary asset!\n\t%v\n", err)
 	}
 
-	words := make(map[string]Word)
-	err = json.Unmarshal(data, &words)
+	model := Model{}
+	err = json.Unmarshal(data, &model)
 	if err != nil {
-		return nil, fmt.Errorf("Could not unmarshal stored words map!\n\t%v\n", err)
+		return nil, fmt.Errorf("Could not unmarshal stored model!\n\t%v\n", err)
 	}
 
-	return &Model{
-		Words: words,
-	}, nil
+	return &model, nil
 }
 
 // Train takes in a directory path to persist the model
@@ -125,12 +144,12 @@ func Restore() (*Model, error) {
 // directory! To just get the model without re-training
 // you should just call "Resore"
 func Train(dir string) (*Model, error) {
-	err := parseDirToData(pos, 1)
+	err := parseDirToData(pos)
 	if err != nil {
 		return nil, fmt.Errorf("Count not parse directory < %v > to data!\n\t%v\n", pos, err)
 	}
 
-	err = parseDirToData(neg, -1)
+	err = parseDirToData(neg)
 	if err != nil {
 		return nil, fmt.Errorf("Count not parse directory < %v > to data!\n\t%v\n", neg, err)
 	}
@@ -142,10 +161,10 @@ func Train(dir string) (*Model, error) {
 		return nil, fmt.Errorf("Count not create temp directory!\n\t%v\n", err)
 	}
 
-	err = PersistToFile(words, path.Join(dir, "words.json"))
+	err = PersistToFile(*model, path.Join(dir, "model.json"))
 	if err != nil {
 		return nil, fmt.Errorf("Could not persist m.Words to JSON!\n\t%v\n", err)
 	}
 
-	return &Model{Words: words}, nil
+	return model, nil
 }

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"math/rand"
 	"os"
 	"path/filepath"
 	"strings"
@@ -17,14 +16,13 @@ import (
 )
 
 var (
-	// words is the main dictionary
-	// we're using to base our features
-	// from
-	words map[string]Word
-	dict  map[string]int
-	count int
+	// model is the model to be trained
+	model *Model
 
-	// filepaths
+	dict map[string]int64
+
+	// filepaths (assume user is in
+	// current directory)
 	pos string
 	neg string
 
@@ -32,9 +30,11 @@ var (
 )
 
 func init() {
-	words = make(map[string]Word)
-	dict = make(map[string]int)
-	count = 0
+	model = &Model{
+		Words: make(map[string]Word),
+	}
+
+	dict = make(map[string]int64)
 
 	var posErr, negErr error
 
@@ -60,34 +60,64 @@ func init() {
 			return true
 		}
 	})
-
-	// repeatable!
-	rand.Seed(42)
 }
 
 // Model encapsulates a the data required
 // to run sentiment prediction
 type Model struct {
+	// Word mappings within the trained model
 	Words map[string]Word
+
+	// Gives the number of times
+	// an example was either positive
+	// or negative, or either
+	CountPositive int64
+	CountNegative int64
+	Count         int64
+
+	// The number of words in our
+	// dictionary (pun sort of
+	// intended :)
+	DictSize int64
+
+	// Gives the pre-calculated
+	// probability that Y is 1
+	// or Y is 0
+	PYIsOne  float64
+	PYIsZero float64
 }
 
 // Word represents the amount of times
 // a word has been seen within the data
 // and its associated modifier
 type Word struct {
-	Val         int64
-	Count       int64
-	Probability float64
+	// Gives the number of times X is found
+	// in a positive example, a negative
+	// example, or any example
+	CountPositive int64
+	CountNegative int64
+
+	// Gives the probability that
+	// an x is found given y is
+	// either 0, or y is 1
+	ProbabilityXIsOne  float64
+	ProbabilityXIsZero float64
 }
 
 func calcProbabilities() {
 	now := time.Now()
 	fmt.Printf("Starting calculating probabilities at %v\n", now)
 
-	for i := range words {
-		tmp := words[i]
-		tmp.Probability = float64(tmp.Val) / float64(tmp.Count)
-		words[i] = tmp
+	model.DictSize = int64(len(model.Words))
+
+	model.PYIsOne = float64(model.CountPositive) / float64(model.Count)
+	model.PYIsZero = float64(model.CountNegative) / float64(model.Count)
+
+	for i := range model.Words {
+		tmp := model.Words[i]
+		tmp.ProbabilityXIsOne = (float64(tmp.CountPositive) + 1) / (float64(model.CountPositive) + float64(model.DictSize))
+		tmp.ProbabilityXIsZero = (float64(tmp.CountNegative) + 1) / (float64(model.CountNegative) + float64(model.DictSize))
+		model.Words[i] = tmp
 	}
 
 	fmt.Printf("Ended calculating probabilities at %v\n", time.Now().Sub(now))
@@ -98,11 +128,14 @@ func calcProbabilities() {
 // datasets/train/* and datasets/test/*.) Because positive and
 // negative examples are in separate directories, modifier is
 // predetermined and will be the value of 'y' for each example.
-func parseDirToData(dirpath string, modifier int64) error {
+func parseDirToData(dirpath string) error {
 	now := time.Now()
 	fmt.Printf("Starting munging from < %v > to data at %v\n", dirpath, now)
 
 	var ct int
+
+	positive := strings.Contains(dirpath, "pos")
+
 	err := filepath.Walk(dirpath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -137,21 +170,34 @@ func parseDirToData(dirpath string, modifier int64) error {
 					continue
 				}
 
-				if _, ok := words[word]; ok {
-					tmp := words[word]
-					tmp.Val += modifier
-					tmp.Count++
+				if _, ok := model.Words[word]; ok {
+					tmp := model.Words[word]
+					if positive {
+						tmp.CountPositive++
+					} else {
+						tmp.CountNegative++
+					}
 
-					words[word] = tmp
+					model.Words[word] = tmp
+				} else if positive {
+					model.Words[word] = Word{
+						CountPositive: int64(1),
+					}
 				} else {
-					words[word] = Word{
-						Val:   modifier,
-						Count: 1,
+					model.Words[word] = Word{
+						CountNegative: int64(1),
 					}
 				}
 			}
 		}
 
+		if positive {
+			model.CountPositive++
+		} else {
+			model.CountNegative++
+		}
+
+		model.Count++
 		return nil
 	})
 
@@ -163,7 +209,7 @@ func parseDirToData(dirpath string, modifier int64) error {
 	return err
 }
 
-// addWordsToGlobalMap adds words contained within
+// addmodel.WordsToGlobalMap adds model.Words contained within
 // a dictionary file to memory
 func addWordsToGlobalMap(dictpath string) {
 	f, err := os.Open(dictpath)
@@ -177,7 +223,7 @@ func addWordsToGlobalMap(dictpath string) {
 	scanner.Split(bufio.ScanLines)
 
 	now := time.Now()
-	fmt.Printf("Starting adding words from < %v > to word bank at %v\n", dictpath, now)
+	fmt.Printf("Starting adding model.Words from < %v > to word bank at %v\n", dictpath, now)
 
 	for scanner.Scan() {
 		// remove all punctuation and convert to lower case
@@ -189,11 +235,10 @@ func addWordsToGlobalMap(dictpath string) {
 
 		// add word to map if the word is present
 		if _, there := dict[text]; !there {
-			dict[text] = count
-			count++
+			dict[text] = int64(len(dict))
 		}
 	}
-	fmt.Printf("Finished adding words from < %v > to bank\n\tdelta: %v\n", dictpath, time.Now().Sub(now))
+	fmt.Printf("Finished adding model.Words from < %v > to bank\n\tdelta: %v\n", dictpath, time.Now().Sub(now))
 }
 
 // parseLineToText takes in a string, converts
@@ -205,14 +250,14 @@ func parseLineToText(s string) string {
 	return strings.TrimSuffix(strings.ToLower(sanitized), "\n")
 }
 
-// PersistToFile persists a words summary map to
+// PersistToFile persists a model.Words summary map to
 // a filepath, returning any errors
-func PersistToFile(words map[string]Word, path string) error {
+func PersistToFile(m Model, path string) error {
 	if path == "" {
 		return fmt.Errorf("ERROR: you just tried to persist your model to a file with no path!! That's a no-no. Try it with a valid filepath")
 	}
 
-	bytes, err := json.Marshal(words)
+	bytes, err := json.Marshal(m)
 	if err != nil {
 		return err
 	}
@@ -228,7 +273,7 @@ func PersistToFile(words map[string]Word, path string) error {
 // RestoreFromFile resores a word summary map
 // (probably saved with PersistToFile) into
 // memory, returning any errors
-func RestoreFromFile(path string) (map[string]Word, error) {
+func RestoreFromFile(path string) (*Model, error) {
 	if path == "" {
 		return nil, fmt.Errorf("ERROR: you just tried to restore your model from a file with no path! That's a no-no. Try it with a valid filepath")
 	}
@@ -238,12 +283,12 @@ func RestoreFromFile(path string) (map[string]Word, error) {
 		return nil, err
 	}
 
-	words := make(map[string]Word)
+	model := Model{}
 
-	err = json.Unmarshal(bytes, &words)
+	err = json.Unmarshal(bytes, &model)
 	if err != nil {
 		return nil, err
 	}
 
-	return words, nil
+	return &model, nil
 }
