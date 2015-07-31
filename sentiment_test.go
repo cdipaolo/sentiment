@@ -130,7 +130,13 @@ func TestSentimentAnalysisShouldPass1(t *testing.T) {
 	if analysis.Words == nil {
 		t.Errorf("Analysis of transcript returned nil words array!\n")
 	} else {
-		t.Logf("Analysis of transcript retuned valid word array\n\t returned %+v\n", analysis.Words)
+		t.Logf("Analysis of transcript retuned valid word array\n\treturned %+v\n", analysis.Words)
+	}
+
+	if analysis.Sentences == nil {
+		t.Errorf("Split sentence analysis should not be nil!\n")
+	} else {
+		t.Logf("Split sentence analysis returned valid sentence arrat\n\treturned %+v\n", analysis.Sentences)
 	}
 }
 
@@ -230,6 +236,31 @@ func TestSentimentAnalysisShouldPass6(t *testing.T) {
 		t.Errorf("Analysis of transcript returned nil words array!\n")
 	} else {
 		t.Logf("Analysis of transcript retuned valid word array\n\t returned %+v\n", analysis.Words)
+	}
+}
+
+func TestSentimentAnalysisShouldPass7(t *testing.T) {
+	t.Parallel()
+	transcript := `I am a relatively happy sentence!`
+
+	analysis := model.SentimentAnalysis(transcript)
+
+	if analysis.Score <= 0.5 {
+		t.Errorf("Analysis of transcript should be greater than 0.5\n\treturned %v\n", analysis.Score)
+	} else {
+		t.Logf("Analysis of transcript was valid\n\treturned %v\n", analysis.Score)
+	}
+
+	if analysis.Words == nil {
+		t.Errorf("Analysis of transcript returned nil words array!\n")
+	} else {
+		t.Logf("Analysis of transcript retuned valid word array\n\t returned %+v\n", analysis.Words)
+	}
+
+	if analysis.Sentences != nil {
+		t.Errorf("Split sentence analysis should be nil!\n\t%v\n", analysis.Sentences)
+	} else {
+		t.Logf("Split sentence analysis returned nil sentence array (valid)\n")
 	}
 }
 

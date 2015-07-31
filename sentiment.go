@@ -16,9 +16,15 @@ type Score struct {
 	Score float64 `json:"score"`
 }
 
+type SentenceScore struct {
+	Sentence string  `json:"sentence"`
+	Score    float64 `json:"score"`
+}
+
 type Analysis struct {
-	Words []Score `json:"words"`
-	Score float64 `json:"score"`
+	Words     []Score         `json:"words"`
+	Sentences []SentenceScore `json:"sentences,omitempty"`
+	Score     float64         `json:"score"`
 }
 
 // SentimentOfWord takes in a single word and
@@ -76,6 +82,19 @@ func (m *Model) SentimentAnalysis(sentence string) *Analysis {
 		Score: 0.0,
 	}
 
+	sentences := strings.FieldsFunc(sentence, SplitSentences)
+	if len(sentences) > 1 {
+		analysis.Sentences = []SentenceScore{}
+
+		for _, s := range sentences {
+			s = Clean(s)
+			analysis.Sentences = append(analysis.Sentences, SentenceScore{
+				Sentence: s,
+				Score:    m.SentimentOfSentence(s),
+			})
+		}
+	}
+
 	sentence = Clean(sentence)
 
 	w := strings.Split(sentence, " ")
@@ -89,6 +108,20 @@ func (m *Model) SentimentAnalysis(sentence string) *Analysis {
 	analysis.Score = m.SentimentOfSentence(sentence)
 
 	return analysis
+}
+
+// SplitSentences takes in a rune r and
+// returns whether the rune is a sentence
+// delimiter ('.', '?', or '!').
+//
+// It satisfies the interface for
+// strings.FieldsFunc()
+func SplitSentences(r rune) bool {
+	switch r {
+	case '.', '?', '!':
+		return true
+	}
+	return false
 }
 
 // Clean takes in a string (it says sentence
