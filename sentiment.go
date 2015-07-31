@@ -16,7 +16,7 @@ type Score struct {
 }
 
 type Analysis struct {
-	Words []Score `json:"m.Words"`
+	Words []Score `json:"words"`
 	Score float64 `json:"score"`
 }
 
