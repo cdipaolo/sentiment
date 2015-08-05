@@ -45,12 +45,8 @@ func (m *Model) SentimentOfWord(word string) float64 {
 // the sentence is negative and 1 if the sample
 // is positive
 func (m *Model) SentimentOfSentence(sentence string) float64 {
-	// These are the _probability_ products
-	// given in the numerator and denominator
-	// that a sentence is positive or negative
-	// (1 or 0)
-	var one float64 = 1.0
-	var zero float64 = 1.0
+	var one float64
+	var zero float64
 
 	w := strings.Split(sentence, " ")
 	for _, word := range w {
