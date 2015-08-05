@@ -1,7 +1,7 @@
 package sentiment
 
 import (
-	"github.com/cdipaolo/goml"
+	"github.com/cdipaolo/goml/base"
 )
 
 // Language is a language code used
@@ -47,7 +47,7 @@ const (
 
 // Models holds a map from language keys
 // to sentiment classifiers.
-type Models map[string]base.OnlineTextModel
+type Models map[Language]LanguageModel
 
 // LanguageModel holds a goml text model
 // to be trained for sentiment. It just
@@ -58,4 +58,35 @@ type LanguageModel struct {
 	errors chan error
 
 	Model base.OnlineTextModel `json:"model"`
+}
+
+// Score holds the score of a
+// singular word (differs from
+// SentenceScore only in param
+// names and JSON marshaling, not
+// actualy types)
+type Score struct {
+	Word  string `json:"word"`
+	Score uint8  `json:"score"`
+}
+
+// SentenceScore holds the score
+// of a document, which could be
+// (and probably is) a sentence
+type SentenceScore struct {
+	Sentence string `json:"sentence"`
+	Score    uint8  `json:"score"`
+}
+
+// Analysis returns the analysis
+// of a document, splitting it into
+// total sentiment, individual sentence
+// sentiment, and individual word
+// sentiment, along with the language
+// code
+type Analysis struct {
+	Language  Language        `json:"lang"`
+	Words     []Score         `json:"words"`
+	Sentences []SentenceScore `json:"sentences,omitempty"`
+	Score     uint8           `json:"score"`
 }
