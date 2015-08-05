@@ -32,11 +32,11 @@ Analysis:
 cleaned := sentiment.Clean("MaKe Th1s Into LOWER c-----ase and tak3 out numb3rs, etc.")
 
 // get word sentiment
-s := model.SentimentOfWord("love") // greater than 0
-s = model.SentimentOfWord("hate") // less than 0
+s := model.SentimentOfWord("love") // greater than 0.5
+s = model.SentimentOfWord("hate") // less than 0.5
 
-// get sentence sentiment
-s = model.SentimentOfSentence(sentiment.Clean("I had a great day!!!")) // greater than 0
+// get sentence/document sentiment
+s = model.SentimentOfSentence(sentiment.Clean("I had a great day!!!")) // 1
 
 // get sentiment analysis (sentiment for every word as well as overall score)
 //
