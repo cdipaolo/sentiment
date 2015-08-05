@@ -1,22 +1,13 @@
 package sentiment
 
-import (
-	"encoding/json"
-	"fmt"
-	"math"
-	"os"
-	"path"
-	"strings"
-
-	"golang.org/x/text/transform"
-)
+import "strings"
 
 // SentimentAnalysis takes in a (possibly 'dirty')
 // sentence (or any block of text,) cleans the
 // text, finds the sentiment of each word in the
 // text, finds the sentiment of the sentence as
 // a whole, adn returns an Analysis struct
-func (m *Models) SentimentAnalysis(sentence string, lang Language) *Analysis {
+func (m Models) SentimentAnalysis(sentence string, lang Language) *Analysis {
 	if _, ok := m[lang]; !ok {
 		lang = English
 	}
@@ -34,7 +25,7 @@ func (m *Models) SentimentAnalysis(sentence string, lang Language) *Analysis {
 		for _, s := range sentences {
 			analysis.Sentences = append(analysis.Sentences, SentenceScore{
 				Sentence: s,
-				Score:    m[lang].Model.Predict(s),
+				Score:    m[lang].Predict(s),
 			})
 		}
 	}
@@ -43,11 +34,11 @@ func (m *Models) SentimentAnalysis(sentence string, lang Language) *Analysis {
 	for _, word := range w {
 		analysis.Words = append(analysis.Words, Score{
 			Word:  word,
-			Score: m[lang].Model.Predict(s),
+			Score: m[lang].Predict(word),
 		})
 	}
 
-	analysis.Score = m.SentimentOfSentence(sentence)
+	analysis.Score = m[lang].Predict(sentence)
 
 	return analysis
 }

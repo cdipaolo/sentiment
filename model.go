@@ -47,18 +47,7 @@ const (
 
 // Models holds a map from language keys
 // to sentiment classifiers.
-type Models map[Language]LanguageModel
-
-// LanguageModel holds a goml text model
-// to be trained for sentiment. It just
-// encapsulates the data stream and
-// error stream
-type LanguageModel struct {
-	stream chan base.TextDatapoint
-	errors chan error
-
-	Model base.OnlineTextModel `json:"model"`
-}
+type Models map[Language]base.OnlineTextModel
 
 // Score holds the score of a
 // singular word (differs from

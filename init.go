@@ -1,6 +1,16 @@
 package sentiment
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"os"
+	"path"
+)
+
+const (
+	TempDirectory string = "/tmp/.sentiment"
+)
 
 // Restore restores a pre-trained models from
 // a binary asset this is the preferable method
@@ -8,7 +18,7 @@ import "encoding/json"
 // to train the model again)
 //
 // This basically wraps RestoreModels.
-func Restore() (*Model, error) {
+func Restore() (Models, error) {
 	data, err := Asset("model.json")
 	if err != nil {
 		return nil, fmt.Errorf("Could not restore model from binary asset!\n\t%v\n", err)
@@ -24,11 +34,31 @@ func Restore() (*Model, error) {
 // specific sentiment analysis
 func RestoreModels(bytes []byte) (Models, error) {
 	models := make(Models)
-	err := json.Unmarshal(bytes, &model)
+	err := json.Unmarshal(bytes, &models)
 	if err != nil {
 		return nil, err
 	}
 	return models, nil
+}
+
+// PersistToFile persists a Models struct to
+// a filepath, returning any errors
+func PersistToFile(m Models, path string) error {
+	if path == "" {
+		return fmt.Errorf("ERROR: you just tried to persist your model to a file with no path!! That's a no-no. Try it with a valid filepath")
+	}
+
+	bytes, err := json.Marshal(m)
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(path, bytes, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Train takes in a directory path to persist the model
@@ -39,28 +69,22 @@ func RestoreModels(bytes []byte) (Models, error) {
 // Note that this must be run from within the project
 // directory! To just get the model without re-training
 // you should just call "Resore"
-func Train(dir string) (*Model, error) {
-	err := parseDirToData(pos)
+func Train() (Models, error) {
+	models := make(Models)
+	err := TrainEnglishModel(models)
 	if err != nil {
-		return nil, fmt.Errorf("Count not parse directory < %v > to data!\n\t%v\n", pos, err)
+		return nil, fmt.Errorf("Count not train English sentiment model!\n\t%v\n", err)
 	}
 
-	err = parseDirToData(neg)
-	if err != nil {
-		return nil, fmt.Errorf("Count not parse directory < %v > to data!\n\t%v\n", neg, err)
-	}
-
-	calcProbabilities()
-
-	err = os.MkdirAll(dir, os.ModePerm)
+	err = os.MkdirAll(TempDirectory, os.ModePerm)
 	if err != nil {
 		return nil, fmt.Errorf("Count not create temp directory!\n\t%v\n", err)
 	}
 
-	err = PersistToFile(*model, path.Join(dir, "model.json"))
+	err = PersistToFile(models, path.Join(TempDirectory, "model.json"))
 	if err != nil {
 		return nil, fmt.Errorf("Could not persist m.Words to JSON!\n\t%v\n", err)
 	}
 
-	return model, nil
+	return models, nil
 }
