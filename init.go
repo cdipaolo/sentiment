@@ -11,6 +11,8 @@ import (
 )
 
 const (
+	// TempDirectory is the default temporary
+	// directory for persisting models to disk
 	TempDirectory string = "/tmp/.sentiment"
 )
 
