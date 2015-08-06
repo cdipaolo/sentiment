@@ -2,7 +2,16 @@
 #### Simple, Drop In Sentiment Analysis in Golang
 [![GoDoc](https://godoc.org/github.com/cdipaolo/sentiment?status.svg)](https://godoc.org/github.com/cdipaolo/sentiment)
 
+This package relies on the work done in [my other package, goml,](https://github.com/cdipaolo/goml/text) for multiclass text classification
+
 Sentiment lets you pass strings into a function and get an estimate of the sentiment of the string (in english) using a very simple probabalistic model. The model is trained off of [this dataset](https://inclass.kaggle.com/c/si650winter11/data) which is a collection of IMDB movie reviews classified by sentiment. The returned values for single word classification is the corresponding probability that the document is positive on [0,1]. For sentence/document classification the result is returned as a descrete classification on {0,1} corresponding to either negative or positive, respectively.
+
+### Implemented Languages
+
+If you want to implement another language, open an issue or [email me](mailto:cdipaolo96@gmail.com). It really is not hard (_if_ you have a dataset.)
+
+- English
+  * dataset: IMDB Reviews
 
 ### Model
 
@@ -18,7 +27,7 @@ Training, or Restoring a Pre-Trained Model:
 // usually prefer Restore because it's faster and
 // you don't have to be in the project's directory
 //
-// model, err := sentiment.Train("dir/to/save/to")
+// model, err := sentiment.Train()
 
 model, err := sentiment.Restore()
 if err != nil {
@@ -28,20 +37,9 @@ if err != nil {
 
 Analysis:
 ```go
-// sanitize input
-cleaned := sentiment.Clean("MaKe Th1s Into LOWER c-----ase and tak3 out numb3rs, etc.")
-
-// get word sentiment
-s := model.SentimentOfWord("love") // greater than 0
-s = model.SentimentOfWord("hate") // less than 0
-
-// get sentence sentiment
-s = model.SentimentOfSentence(sentiment.Clean("I had a great day!!!")) // greater than 0
-
-// get sentiment analysis (sentiment for every word as well as overall score)
-//
-// this is the 'plug and play' analysis, pretty much.
-analysis = model.SentimentAnalysis("this is a D3rty sentence that will get cleaned prior to being evaluated")
+// get sentiment analysis summary
+// in any implemented language
+analysis = model.SentimentAnalysis("You're mother is not a nice lady", sentiment.English) // 0
 ```
 
 ### LICENSE - MIT

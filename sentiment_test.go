@@ -7,15 +7,42 @@ var model Models
 func init() {
 	var err error
 
-	model, err = Train()
+	//model, err = Train()
 
-	//model, err = Restore()
+	model, err = Restore()
 	if err != nil {
 		panic(err.Error())
 	}
 }
 
-/*
+func TestPositiveWordSentimentShouldPass1(t *testing.T) {
+	t.Parallel()
+
+	w := []string{"happy", "love", "happiness", "humanity", "awesome", "great", "fun", "super", "trust", "fearless", "creative", "dream", "good", "compassion", "joy", "independent", "success"}
+	for _, word := range w {
+		s := model.SentimentAnalysis(word, English)
+		if s.Score != uint8(1) {
+			t.Errorf("Sentiment of < %v > (returned %v) should be greater than 0.5!\n", word, s)
+		} else {
+			t.Logf("Sentiment of < %v > valid\n\tReturned %v\n", word, s)
+		}
+	}
+}
+
+func TestNegativeWordSentimentShouldPass1(t *testing.T) {
+	t.Parallel()
+
+	w := []string{"not", "resent", "deplorable", "bad", "terrible", "hate", "scary", "terrible", "concerned", "wrong", "rude!!!", "sad", "horrible", "unimpressed", "useless", "offended", "disrespectful"}
+	for _, word := range w {
+		s := model.SentimentAnalysis(word, English)
+		if s.Score != uint8(0) {
+			t.Errorf("Sentiment of < %v > (returned %v) should be less than 0.5!\n", word, s)
+		} else {
+			t.Logf("Sentiment of < %v > valid\n\tReturned %v\n", word, s)
+		}
+	}
+}
+
 func TestPositiveSentenceSentimentShouldPass1(t *testing.T) {
 	t.Parallel()
 
@@ -36,8 +63,8 @@ func TestPositiveSentenceSentimentShouldPass1(t *testing.T) {
 	}
 
 	for _, sentence := range w {
-		s := model.SentimentOfSentence(Clean(sentence))
-		if s != uint8(1) {
+		s := model.SentimentAnalysis(sentence, English)
+		if s.Score != uint8(1) {
 			t.Errorf("Sentiment of sentence < %v > (returned %v) should be greater than 0.5!\n", sentence, s)
 		} else {
 			t.Logf("Sentiment of sentence < %v > is valid.\n\tReturned %v\n", sentence, s)
@@ -65,15 +92,14 @@ func TestNegativeSentenceSentimentShouldPass1(t *testing.T) {
 	}
 
 	for _, sentence := range w {
-		s := model.SentimentOfSentence(Clean(sentence))
-		if s != uint8(0) {
+		s := model.SentimentAnalysis(sentence, English)
+		if s.Score != uint8(0) {
 			t.Errorf("Sentiment of sentence < %v > (returned %v) should be less than 0.5!\n", sentence, s)
 		} else {
 			t.Logf("Sentiment of sentence < %v > is valid.\n\tReturned %v\n", sentence, s)
 		}
 	}
 }
-*/
 
 func TestSentimentAnalysisShouldPass1(t *testing.T) {
 	t.Parallel()
@@ -163,7 +189,7 @@ func TestSentimentAnalysisShouldPass4(t *testing.T) {
 // From F. Scott Fitzgerald - Great Gatsby
 func TestSentimentAnalysisShouldPass5(t *testing.T) {
 	t.Parallel()
-	transcript := `He smiled understandingly-much more than understandingly. It was one of those rare smiles with a quality of eternal reassurance in it, that you may come across four or five times in life. It faced–or seemed to face–the whole eternal world for an instant, and then concentrated on you with an irresistible prejudice in your favor. It understood you just as far as you wanted to be understood, believed in you as you would like to believe in yourself, and assured you that it had precisely the impression of you that, at your best, you hoped to convey.`
+	transcript := `He smiled understandingly- much more than understandingly. It was one of those rare smiles with a quality of eternal reassurance in it, that you may come across four or five times in life. It faced–or seemed to face–the whole eternal world for an instant, and then concentrated on you with an irresistible prejudice in your favor. It understood you just as far as you wanted to be understood, believed in you as you would like to believe in yourself, and assured you that it had precisely the impression of you that, at your best, you hoped to convey.`
 
 	analysis := model.SentimentAnalysis(transcript, English)
 

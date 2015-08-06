@@ -26,7 +26,7 @@ func TrainEnglishModel(modelMap Models) error {
 
 	stream := make(chan base.TextDatapoint, 1000)
 	errors := make(chan error, 100)
-	model := text.NewNaiveBayes(stream, 2, base.OnlyWordsAndNumbers)
+	model := text.NewNaiveBayes(stream, 2, base.OnlyWords)
 
 	go model.OnlineLearn(errors)
 

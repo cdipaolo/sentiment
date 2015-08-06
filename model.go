@@ -1,7 +1,7 @@
 package sentiment
 
 import (
-	"github.com/cdipaolo/goml/base"
+	"github.com/cdipaolo/goml/text"
 )
 
 // Language is a language code used
@@ -47,7 +47,7 @@ const (
 
 // Models holds a map from language keys
 // to sentiment classifiers.
-type Models map[Language]base.OnlineTextModel
+type Models map[Language]*text.NaiveBayes
 
 // Score holds the score of a
 // singular word (differs from

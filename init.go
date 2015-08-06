@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+
+	"github.com/cdipaolo/goml/base"
 )
 
 const (
@@ -38,6 +40,12 @@ func RestoreModels(bytes []byte) (Models, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	for i := range models {
+		models[i].UpdateSanitize(base.OnlyWords)
+	}
+
+	fmt.Printf("Model: %v\n\tSentiment: %v\n\n", models, models.SentimentAnalysis("I love this weather", English))
 	return models, nil
 }
 
