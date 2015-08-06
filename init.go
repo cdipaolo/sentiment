@@ -45,7 +45,6 @@ func RestoreModels(bytes []byte) (Models, error) {
 		models[i].UpdateSanitize(base.OnlyWords)
 	}
 
-	fmt.Printf("Model: %v\n\tSentiment: %v\n\n", models, models.SentimentAnalysis("I love this weather", English))
 	return models, nil
 }
 
