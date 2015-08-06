@@ -1,6 +1,7 @@
 ## Sentiment
 #### Simple, Drop In Sentiment Analysis in Golang
 [![GoDoc](https://godoc.org/github.com/cdipaolo/sentiment?status.svg)](https://godoc.org/github.com/cdipaolo/sentiment)
+[![wercker status](https://app.wercker.com/status/35e33e359f09aa4bbf9121cf57a51118/s "wercker status")](https://app.wercker.com/project/bykey/35e33e359f09aa4bbf9121cf57a51118)
 
 This package relies on the work done in [my other package, goml,](https://github.com/cdipaolo/goml/text) for multiclass text classification
 
