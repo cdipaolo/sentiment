@@ -1,0 +1,20 @@
+box: google/golang
+
+build:
+  # The steps that will be executed on build
+  steps:
+    - setup-go-workspace
+    - wercker/golint@1.2.0
+    
+    # Get dependencies
+    - script:
+        name: go get
+        code: |
+          cd $WERCKER_SOURCE_DIR
+          go get -v -t ./...
+    # Test the project
+    - script:
+        name: go test
+        code: |
+          cd $WERCKER_SOURCE_DIR
+          go test -v ./...
