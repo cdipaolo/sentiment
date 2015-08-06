@@ -43,6 +43,7 @@ const (
 	Hebrew                      = "he"
 	Urdu                        = "ur"
 	Thai                        = "th"
+	NoLanguage                  = ""
 )
 
 // Models holds a map from language keys
