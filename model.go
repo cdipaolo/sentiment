@@ -63,9 +63,8 @@ type Models map[Language]*text.NaiveBayes
 // model's prediction of 'negative'
 // is 'very confident')
 type Score struct {
-	Word        string  `json:"word"`
-	Score       uint8   `json:"score"`
-	Probability float64 `json:"probability"`
+	Word  string  `json:"word"`
+	Score float64 `json:"score"`
 }
 
 // SentenceScore holds the score

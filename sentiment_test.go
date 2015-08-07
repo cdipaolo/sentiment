@@ -32,10 +32,10 @@ func TestPositiveWordSentimentShouldPass1(t *testing.T) {
 		}
 
 		for _, score := range s.Words {
-			if score.Probability < 0.5 {
-				t.Errorf("Probability of < %v > (returned %v) being class < %v > should be greater than 0.5 always!\n", score.Word, score.Probability, score.Score)
+			if score.Score < 0.5 {
+				t.Errorf("Probability of < %v > (returned %v) should be greater than 0.5 always!\n", score.Word, score.Score)
 			} else {
-				t.Logf("Probability of < %v > being class < %v > valid\n\tReturned %v\n", score.Word, score.Score, score.Probability)
+				t.Logf("Probability of < %v > valid\n\tReturned %v\n", score.Word, score.Score)
 			}
 		}
 	}
@@ -58,10 +58,10 @@ func TestNegativeWordSentimentShouldPass1(t *testing.T) {
 		}
 
 		for _, score := range s.Words {
-			if score.Probability < 0.5 {
-				t.Errorf("Probability of < %v > (returned %v) being class < %v > should be greater than 0.5 always!\n", score.Word, score.Probability, score.Score)
+			if score.Score > 0.5 {
+				t.Errorf("Probability of < %v > (returned %v) should be less than 0.5 always!\n", score.Word, score.Score)
 			} else {
-				t.Logf("Probability of < %v > being class < %v > valid\n\tReturned %v\n", score.Word, score.Score, score.Probability)
+				t.Logf("Probability of < %v > valid\n\tReturned %v\n", score.Word, score.Score)
 			}
 		}
 	}
