@@ -40,7 +40,7 @@ Analysis:
 ```go
 // get sentiment analysis summary
 // in any implemented language
-analysis = model.SentimentAnalysis("You're mother is not a nice lady", sentiment.English) // 0
+analysis = model.SentimentAnalysis("You're mother is an awful lady", sentiment.English) // 0
 ```
 
 ### LICENSE - MIT
