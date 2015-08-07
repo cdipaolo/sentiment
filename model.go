@@ -54,10 +54,18 @@ type Models map[Language]*text.NaiveBayes
 // singular word (differs from
 // SentenceScore only in param
 // names and JSON marshaling, not
-// actualy types)
+// actualy types). Probability
+// corresponds to the probability
+// that the word is of the expected
+// class (ie. if the word is
+// negative and the probability is
+// 0.96, then you could say the
+// model's prediction of 'negative'
+// is 'very confident')
 type Score struct {
-	Word  string `json:"word"`
-	Score uint8  `json:"score"`
+	Word        string  `json:"word"`
+	Score       uint8   `json:"score"`
+	Probability float64 `json:"probability"`
 }
 
 // SentenceScore holds the score

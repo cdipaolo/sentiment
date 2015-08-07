@@ -32,9 +32,11 @@ func (m Models) SentimentAnalysis(sentence string, lang Language) *Analysis {
 
 	w := strings.Split(sentence, " ")
 	for _, word := range w {
+		class, P := m[lang].Probability(word)
 		analysis.Words = append(analysis.Words, Score{
-			Word:  word,
-			Score: m[lang].Predict(word),
+			Word:        word,
+			Score:       class,
+			Probability: P,
 		})
 	}
 

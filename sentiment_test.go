@@ -26,6 +26,18 @@ func TestPositiveWordSentimentShouldPass1(t *testing.T) {
 		} else {
 			t.Logf("Sentiment of < %v > valid\n\tReturned %v\n", word, s)
 		}
+
+		if len(s.Words) == 0 {
+			t.Fatalf("Words returned should have individual sentiment\n\t%v\n", s)
+		}
+
+		for _, score := range s.Words {
+			if score.Probability < 0.5 {
+				t.Errorf("Probability of < %v > (returned %v) being class < %v > should be greater than 0.5 always!\n", score.Word, score.Probability, score.Score)
+			} else {
+				t.Logf("Probability of < %v > being class < %v > valid\n\tReturned %v\n", score.Word, score.Score, score.Probability)
+			}
+		}
 	}
 }
 
@@ -39,6 +51,18 @@ func TestNegativeWordSentimentShouldPass1(t *testing.T) {
 			t.Errorf("Sentiment of < %v > (returned %v) should be less than 0.5!\n", word, s)
 		} else {
 			t.Logf("Sentiment of < %v > valid\n\tReturned %v\n", word, s)
+		}
+
+		if len(s.Words) == 0 {
+			t.Fatalf("Words returned should have individual sentiment\n\t%v\n", s)
+		}
+
+		for _, score := range s.Words {
+			if score.Probability < 0.5 {
+				t.Errorf("Probability of < %v > (returned %v) being class < %v > should be greater than 0.5 always!\n", score.Word, score.Probability, score.Score)
+			} else {
+				t.Logf("Probability of < %v > being class < %v > valid\n\tReturned %v\n", score.Word, score.Score, score.Probability)
+			}
 		}
 	}
 }
