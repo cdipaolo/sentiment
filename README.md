@@ -5,7 +5,7 @@
 
 This package relies on the work done in [my other package, goml,](https://github.com/cdipaolo/goml/text) for multiclass text classification
 
-Sentiment lets you pass strings into a function and get an estimate of the sentiment of the string (in english) using a very simple probabalistic model. The model is trained off of [this dataset](https://inclass.kaggle.com/c/si650winter11/data) which is a collection of IMDB movie reviews classified by sentiment. The returned values for single word classification is the corresponding probability that the document is positive on [0,1]. For sentence/document classification the result is returned as a descrete classification on {0,1} corresponding to either negative or positive, respectively.
+Sentiment lets you pass strings into a function and get an estimate of the sentiment of the string (in english) using a very simple probabalistic model. The model is trained off of [this dataset](https://inclass.kaggle.com/c/si650winter11/data) which is a collection of IMDB movie reviews classified by sentiment. The returned values for single word classification is the given score in {0,1}/{negative/positive} for sentiment as well as the probability on [0,1] that the word is of the expected class. For document sentiment only the class is given (floats would underflow otherwise.)
 
 ### Implemented Languages
 
