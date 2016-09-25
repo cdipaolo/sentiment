@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/cdipaolo/goml/base"
 )
@@ -45,6 +46,10 @@ func RestoreModels(bytes []byte) (Models, error) {
 
 	for i := range models {
 		models[i].UpdateSanitize(base.OnlyWords)
+		models[i].UpdateTokenizer(
+			func(input string) []string {
+				return strings.Split(strings.ToLower(input), " ")
+			})
 	}
 
 	return models, nil
