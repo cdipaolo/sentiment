@@ -6,9 +6,9 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"strings"
 
 	"github.com/cdipaolo/goml/base"
+	"github.com/cdipaolo/goml/text"
 )
 
 const (
@@ -44,12 +44,13 @@ func RestoreModels(bytes []byte) (Models, error) {
 		return nil, err
 	}
 
+	tokenizer := &text.SimpleTokenizer{
+		SplitOn: " ",
+	}
+
 	for i := range models {
 		models[i].UpdateSanitize(base.OnlyWords)
-		models[i].UpdateTokenizer(
-			func(input string) []string {
-				return strings.Split(strings.ToLower(input), " ")
-			})
+		models[i].UpdateTokenizer(tokenizer)
 	}
 
 	return models, nil
