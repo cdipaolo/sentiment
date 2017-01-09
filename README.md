@@ -3,7 +3,7 @@
 [![GoDoc](https://godoc.org/github.com/cdipaolo/sentiment?status.svg)](https://godoc.org/github.com/cdipaolo/sentiment)
 [![wercker status](https://app.wercker.com/status/35e33e359f09aa4bbf9121cf57a51118/s "wercker status")](https://app.wercker.com/project/bykey/35e33e359f09aa4bbf9121cf57a51118)
 
-This package relies on the work done in [my other package, goml,](https://github.com/cdipaolo/goml/text) for multiclass text classification
+This package relies on the work done in [my other package, goml,](https://github.com/cdipaolo/goml/tree/master/text) for multiclass text classification
 
 Sentiment lets you pass strings into a function and get an estimate of the sentiment of the string (in english) using a very simple probabalistic model. The model is trained off of [this dataset](https://inclass.kaggle.com/c/si650winter11/data) which is a collection of IMDB movie reviews classified by sentiment. The returned values for single word classification is the given score in {0,1}/{negative/positive} for sentiment as well as the probability on [0,1] that the word is of the expected class. For document sentiment only the class is given (floats would underflow otherwise.)
 
